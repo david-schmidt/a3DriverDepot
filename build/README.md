@@ -14,6 +14,6 @@
   }
 ```
 `"repo`: The GitHub repo, or other source of truth for this driver   
-`"asm"`: The upstream source of the main assembly file   
+`"asm"`: The upstream source of the main assembly file (or potentially disk image), concatenated with `repo` to arrive at upstream source of truth   
 `"sha`: If from a GitHub repo, the sha of the commit resulting in the upstream source   
-`"local_asm"`: The downstream ca65-assembly version of `"asm"`
+`"local_asm"`: The downstream ca65-assembly version of `"asm"`, if it wasn't already in `ca65` form
