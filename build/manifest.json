@@ -1,0 +1,29 @@
+[
+  {
+    "driver_dib1": ".VSDRIVE",
+    "description": "Apple /// Virtual Serial Drive Driver by David Schmidt 2012 - 2014",
+    "dir": "vsdrive",
+    "repo": "https://github.com/ADTPro/adtpro",
+    "asm": "blob/main/src/client/sos/serial/drive/vsdrive.asm",
+    "sha": "552170569181b05e810bdbcca6828efab3b3ae83",
+    "local_asm": "vsdrive.asm"
+  },
+  {
+    "driver_dib1": ".CFFA3000D1",
+    "description": "Apple /// CFFA3000 (Compact Flash For Apple 3000) Driver by David Schmidt 2011",
+    "dir": "cffa3000",
+    "repo": "https://github.com/david-schmidt/apple-iii-cffa3000-driver",
+    "asm": "blob/master/src/CFFA3000.s",
+    "sha": "1500353920197bec5ddfe96803340063b4cacc38",
+    "local_asm": "CFFA3000.s"
+  },
+  {
+    "driver_dib1": ".FOCUSD1",
+    "description": "Apple /// Focus Driver - by David Schmidt 2019",
+    "dir": "FocusDrive3",
+    "repo": "https://github.com/david-schmidt/FocusDrive3",
+    "asm": "blob/master/src/focus3.s"
+    "sha": "5699c3146c4f8c3577b1cbe1f9b8b726c09e0cfd",
+    "local_asm": "focus3.s"
+  }
+]
