@@ -22,7 +22,7 @@
     "description": "Apple /// Focus Driver - by David Schmidt 2019",
     "dir": "FocusDrive3",
     "repo": "https://github.com/david-schmidt/FocusDrive3",
-    "asm": "blob/master/src/focus3.s"
+    "asm": "blob/master/src/focus3.s",
     "sha": "5699c3146c4f8c3577b1cbe1f9b8b726c09e0cfd",
     "local_asm": "focus3.s"
   }
