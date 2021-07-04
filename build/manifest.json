@@ -25,5 +25,14 @@
     "asm": "blob/master/src/focus3.s",
     "sha": "5699c3146c4f8c3577b1cbe1f9b8b726c09e0cfd",
     "local_asm": "focus3.s"
+  },
+  {
+    "driver_dib1": ".CFIDE1",
+    "description": "Apple /// CompactFlash/IDE Driver by Dale S. Jackson 8/08, modified by D Schmenk 8/11",
+    "dir": "cfideiii",
+    "repo": "https://www.apple3.org/Software/system/drivers/CFIDE_140A.zip",
+    "asm": "CFIDE140A.TXT",
+    "sha": "",
+    "local_asm": "CFIDE.s"
   }
 ]
