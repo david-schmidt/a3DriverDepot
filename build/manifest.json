@@ -6,7 +6,7 @@
     "repo": "https://github.com/ADTPro/adtpro",
     "asm": "blob/main/src/client/sos/serial/drive/vsdrive.asm",
     "sha": "552170569181b05e810bdbcca6828efab3b3ae83",
-    "local_asm": "vsdrive.asm"
+    "local_asm": "vsdrive.s"
   },
   {
     "driver_dib1": ".CFFA3000D1",
