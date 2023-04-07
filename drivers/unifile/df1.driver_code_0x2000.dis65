@@ -74,6 +74,23 @@
 "Type":"ExternalAddr",
 "LabelAnno":"None"},
 
+"Ph2Off":{
+"DataDescriptor":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":false,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"Ph2Off",
+"Value":49284,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
 "QtyRead":{
 "DataDescriptor":{
 "Length":1,
@@ -539,12 +556,14 @@
 "496":"Positive request count, continue",
 "511":"Block number too large",
 "518":"Byte count not a multiple of 512",
+"579":"Copy 7 Control/Status list bytes from device",
 "689":"set up buffer pointer one",
 "693":"now set up 3 more pointers, in $80 increments",
 "712":"set up the xbyte for the pointers",
 "910":"Invalid control/status code",
 "1015":"CtlStat",
 "1017":"Format the device",
+"1081":"This would be pulling data from beyond the Z8 block???",
 "1765":"these look familiar for low level disk nibbles"},
 
 "LongComments":{
@@ -555,7 +574,7 @@
 "BackgroundColor":0},
 
 "0":{
-"Text":"  UNIFILE / DUOFILE SOS Driver\r\n \r\n  Device identification Block (DIB) #0\r\n \r\n",
+"Text":"  UNIFILE / DUOFILE SOS Driver Version 1.00A\r\n \r\n  Device identification Block (DIB) #0\r\n \r\n",
 "BoxMode":false,
 "MaxWidth":80,
 "BackgroundColor":0},
@@ -870,7 +889,7 @@
 "LabelAnno":"None"},
 
 "107":{
-"Label":"Var07",
+"Label":"SlotNum",
 "Value":8299,
 "Source":"User",
 "Type":"GlobalAddr",
@@ -933,14 +952,14 @@
 "LabelAnno":"None"},
 
 "116":{
-"Label":"VarTbl1",
+"Label":"LastUnit",
 "Value":8308,
 "Source":"User",
 "Type":"GlobalAddr",
 "LabelAnno":"None"},
 
 "121":{
-"Label":"VarTbl2",
+"Label":"StatusList",
 "Value":8313,
 "Source":"User",
 "Type":"GlobalAddr",
@@ -1091,6 +1110,104 @@
 "Value":8690,
 "Source":"User",
 "Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"289":{
+"Label":"DInitDone",
+"Value":8481,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"744":{
+"Label":"Done",
+"Value":8936,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"892":{
+"Label":"Done",
+"Value":9084,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"1133":{
+"Label":"Z8Block1",
+"Value":9325,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"1389":{
+"Label":"Z8Block2",
+"Value":9581,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"1645":{
+"Label":"Z8Block3",
+"Value":9837,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"117":{
+"Label":"LastReq",
+"Value":8309,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"1012":{
+"Label":"DRepeatErr",
+"Value":9204,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"1005":{
+"Label":"Write",
+"Value":9197,
+"Source":"User",
+"Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"118":{
+"Label":"Var12",
+"Value":8310,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"119":{
+"Label":"Var13",
+"Value":8311,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"120":{
+"Label":"Var14",
+"Value":8312,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"128":{
+"Label":"Var1C",
+"Value":8320,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"579":{
+"Label":"CpyCSList",
+"Value":8771,
+"Source":"User",
+"Type":"GlobalAddr",
 "LabelAnno":"None"}},
 
 "OperandFormats":{
@@ -1109,6 +1226,18 @@
 "SymbolRef":{
 "Label":"Entry",
 "Part":"Low"}},
+
+"5":{
+"Length":4,
+"Format":"StringGeneric",
+"SubFormat":"Ascii",
+"SymbolRef":null},
+
+"9":{
+"Length":11,
+"Format":"Fill",
+"SubFormat":"None",
+"SymbolRef":null},
 
 "24":{
 "Length":1,
@@ -1166,6 +1295,18 @@
 "SubFormat":"None",
 "SymbolRef":null},
 
+"42":{
+"Length":4,
+"Format":"StringGeneric",
+"SubFormat":"Ascii",
+"SymbolRef":null},
+
+"46":{
+"Length":11,
+"Format":"Fill",
+"SubFormat":"None",
+"SymbolRef":null},
+
 "63":{
 "Length":2,
 "Format":"NumericLE",
@@ -1190,9 +1331,21 @@
 "SubFormat":"None",
 "SymbolRef":null},
 
+"71":{
+"Length":28,
+"Format":"StringGeneric",
+"SubFormat":"Ascii",
+"SymbolRef":null},
+
 "99":{
 "Length":2,
 "Format":"NumericLE",
+"SubFormat":"None",
+"SymbolRef":null},
+
+"121":{
+"Length":7,
+"Format":"Dense",
 "SubFormat":"None",
 "SymbolRef":null},
 
@@ -1402,12 +1555,36 @@
 "Label":"SosBuf",
 "Part":"Low"}},
 
+"801":{
+"Length":3,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"Ph2Off",
+"Part":"Low"}},
+
 "910":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
 "Label":"XCTLCODE",
+"Part":"Low"}},
+
+"988":{
+"Length":3,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"LastUnit",
+"Part":"Low"}},
+
+"993":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"DRepeatErr",
 "Part":"Low"}},
 
 "1038":{
@@ -1940,6 +2117,12 @@
 
 "1773":{
 "Length":4,
+"Format":"Dense",
+"SubFormat":"None",
+"SymbolRef":null},
+
+"1941":{
+"Length":1,
 "Format":"Dense",
 "SubFormat":"None",
 "SymbolRef":null}},

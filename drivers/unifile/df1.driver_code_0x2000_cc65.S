@@ -22,6 +22,7 @@ QtyRead  =       $c8
 AllocSIR =       $1913
 SelC800  =       $1922
 SysErr   =       $1928
+Ph2Off   =       $c084
 MOTOROFF =       $c088
 Q6L      =       $c08c
 
@@ -81,7 +82,7 @@ Var04:   .byte   $00
 Var05:   .byte   $00
 LastError:
          .byte   $00
-Var07:   .byte   $00
+SlotNum: .byte   $00
 Var08:   .byte   $00
 Var09:   .byte   $00
 Var0A:   .byte   $00
@@ -174,7 +175,7 @@ DInit:   bit     InitStatus
          asl     A
          asl     A
          asl     A
-         sta     Var07
+         sta     SlotNum
          lda     #$01
          jsr     L22DB
          bcc     @L2116
@@ -428,7 +429,7 @@ L22DB:   sta     Var0B
 @L22E9:  lda     #$a0
          sta     Var0A
          ldy     #$00
-         ldx     Var07
+         ldx     SlotNum
 @L22F3:  lda     Q6L,x
          bmi     @L2302
          dey
@@ -444,7 +445,7 @@ L22DB:   sta     Var0B
          rts
 
 L230A:   sta     $ca28
-         ldx     Var07
+         ldx     SlotNum
          ldy     #$00
 @L2312:  lda     MOTOROFF,x
          bpl     @L231C
@@ -459,8 +460,8 @@ L230A:   sta     $ca28
 ; 
 ; control code $00
 ; 
-DCtrl00: ldx     Var07
-         lda     $c084,x
+DCtrl00: ldx     SlotNum
+         lda     Ph2Off,x
          rts
 
 L2325:   tay
