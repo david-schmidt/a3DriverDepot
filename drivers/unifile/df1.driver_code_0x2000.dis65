@@ -10,7 +10,7 @@
 "EntryFlags":32702671,
 "AutoLabelStyle":"Simple",
 "AnalysisParams":{
-"AnalyzeUncategorizedData":true,
+"AnalyzeUncategorizedData":false,
 "DefaultTextScanMode":"LowHighAscii",
 "MinCharsForString":4,
 "SeekNearbyTargets":true,
@@ -93,13 +93,13 @@
 
 "ReqCnt":{
 "DataDescriptor":{
-"Length":1,
+"Length":2,
 "Format":"NumericLE",
 "SubFormat":"Hex",
 "SymbolRef":null},
 
 "Comment":"",
-"HasWidth":false,
+"HasWidth":true,
 "Direction":"ReadWrite",
 "MultiMask":null,
 "Label":"ReqCnt",
@@ -121,6 +121,23 @@
 "MultiMask":null,
 "Label":"ReqCode",
 "Value":192,
+"Source":"Project",
+"Type":"ExternalAddr",
+"LabelAnno":"None"},
+
+"SelC800":{
+"DataDescriptor":{
+"Length":1,
+"Format":"NumericLE",
+"SubFormat":"Hex",
+"SymbolRef":null},
+
+"Comment":"",
+"HasWidth":false,
+"Direction":"ReadWrite",
+"MultiMask":null,
+"Label":"SelC800",
+"Value":6434,
 "Source":"Project",
 "Type":"ExternalAddr",
 "LabelAnno":"None"},
@@ -518,6 +535,8 @@
 "294":"Resource not available",
 "302":"Zero # bytes read",
 "399":"I/O error",
+"492":"Positive request count, continue",
+"496":"Positive request count, continue",
 "511":"Block number too large",
 "518":"Byte count not a multiple of 512",
 "689":"set up buffer pointer one",
@@ -844,7 +863,7 @@
 "LabelAnno":"None"},
 
 "106":{
-"Label":"Var06",
+"Label":"LastError",
 "Value":8298,
 "Source":"User",
 "Type":"GlobalAddr",
@@ -1044,6 +1063,34 @@
 "Value":9977,
 "Source":"User",
 "Type":"NonUniqueLocalAddr",
+"LabelAnno":"None"},
+
+"290":{
+"Label":"InitNoDrive",
+"Value":8482,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"294":{
+"Label":"InitNoResource",
+"Value":8486,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"34":{
+"Label":"DCB_Bytes",
+"Value":8226,
+"Source":"User",
+"Type":"GlobalAddr",
+"LabelAnno":"None"},
+
+"498":{
+"Label":"WriteError",
+"Value":8690,
+"Source":"User",
+"Type":"GlobalAddr",
 "LabelAnno":"None"}},
 
 "OperandFormats":{
@@ -1149,12 +1196,20 @@
 "SubFormat":"None",
 "SymbolRef":null},
 
+"164":{
+"Length":3,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"SelC800",
+"Part":"Low"}},
+
 "185":{
 "Length":2,
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"XREQCODE",
+"Label":"SOS_BADREQCODE",
 "Part":"Low"}},
 
 "190":{
@@ -1162,7 +1217,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"XBADOP",
+"Label":"SOS_BADOP",
 "Part":"Low"}},
 
 "195":{
@@ -1269,6 +1324,22 @@
 "Label":"XNODRIVE",
 "Part":"Low"}},
 
+"294":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"SOS_NORESC",
+"Part":"Low"}},
+
+"399":{
+"Length":2,
+"Format":"NumericLE",
+"SubFormat":"Symbol",
+"SymbolRef":{
+"Label":"SOS_IOERR",
+"Part":"Low"}},
+
 "506":{
 "Length":2,
 "Format":"NumericLE",
@@ -1282,7 +1353,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"XBLKNUM",
+"Label":"SOS_BLKNUM",
 "Part":"Low"}},
 
 "518":{
@@ -1290,7 +1361,7 @@
 "Format":"NumericLE",
 "SubFormat":"Symbol",
 "SymbolRef":{
-"Label":"XBYTECNT",
+"Label":"SOS_BYTECNT",
 "Part":"Low"}},
 
 "523":{

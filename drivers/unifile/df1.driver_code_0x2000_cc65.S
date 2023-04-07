@@ -1,12 +1,14 @@
 ; Target assembler: cc65 v2.18.0 [--target none -C df1.driver_code_0x2000_cc65.cfg]
 ; 6502bench SourceGen v1.8.1
          .setcpu "6502"
-XREQCODE =       $20
+SOS_BADREQCODE = $20
 XCTLCODE =       $21
-XBADOP   =       $26
+SOS_NORESC =     $25
+SOS_BADOP =      $26
+SOS_IOERR =      $27
 XNODRIVE =       $28
-XBYTECNT =       $2c
-XBLKNUM  =       $2d
+SOS_BYTECNT =    $2c
+SOS_BLKNUM =     $2d
 
 SIR_Len  =       $05
 ReqCode  =       $c0
@@ -18,11 +20,12 @@ ReqCnt   =       $c4
 SosBlk   =       $c6
 QtyRead  =       $c8
 AllocSIR =       $1913
+SelC800  =       $1922
 SysErr   =       $1928
 MOTOROFF =       $c088
 Q6L      =       $c08c
 
-;   UNIFILE / DUOFILE SOS Driver
+;   UNIFILE / DUOFILE SOS Driver Version 1.00A
 ;  
 ;   Device identification Block (DIB) #0
 ;  
@@ -44,8 +47,9 @@ DIB0_Blks:
          .word   $0001      ;Manufacturer
          .word   $100a      ;Driver version
          .word   $0003      ;DCB length followed by DCB
-L2022:   .byte   $00
-L2023:   .byte   $ff
+DCB_Bytes:
+         .byte   $00
+         .byte   $ff
          .byte   $02
 ; 
 ;   Device identification Block (DIB) #1
@@ -54,7 +58,8 @@ DIB1:    .word   $0000      ;Link pointer to next DIB
          .word   Entry      ;Entry pointer
          .byte   $04        ;Name length byte
          .byte   ".DF2"     ;Device name
-         .res    12,$00
+         .res    11,$00
+         .byte   $00        ;Active, no page alignment
          .byte   $02        ;Slot number
          .byte   $01        ;Unit number
          .byte   $f1        ;Type
@@ -74,7 +79,8 @@ Var02:   .byte   $00
 Var03:   .byte   $00
 Var04:   .byte   $00
 Var05:   .byte   $00
-Var06:   .byte   $00
+LastError:
+         .byte   $00
 Var07:   .byte   $00
 Var08:   .byte   $00
 Var09:   .byte   $00
@@ -84,8 +90,15 @@ Var0C:   .byte   $00
 Var0D:   .byte   $00
 Var0E:   .byte   $00
 Var0F:   .byte   $00
-VarTbl1: .res    5,$00
-VarTbl2: .res    8,$00
+LastUnit:
+         .byte   $00
+LastReq: .byte   $00
+Var12:   .byte   $00
+Var13:   .byte   $00
+Var14:   .byte   $00
+StatusList:
+         .byte   $00,$00,$00,$00,$00,$00,$00
+Var1C:   .byte   $00
 InitStatus:
          .byte   $00
 Var1E:   .byte   $06
@@ -96,17 +109,17 @@ Var21:   .byte   $17
 Entry:   lda     ReqCode
          cmp     #$08
          beq     @L2091
-         lda     Var06
+         lda     LastError
          bne     L20BB
 @L2091:  lda     ReqCode
          cmp     #$09
          beq     @L209A
-         sta     VarTbl1+1
+         sta     LastReq
 @L209A:  jsr     @L20A8
          lda     #$96
          jsr     L230A
          lda     #$00
-         jsr     $1922
+         jsr     SelC800
          rts
 
 @L20A8:  lda     ReqCode
@@ -120,10 +133,10 @@ Entry:   lda     ReqCode
          pha
          rts
 
-BadReq:  lda     #XREQCODE  ;Bad request code!
+BadReq:  lda     #SOS_BADREQCODE ;Bad request code!
 L20BB:   jsr     SysErr
 ; 
-BadOp:   lda     #XBADOP    ;Invalid operation!
+BadOp:   lda     #SOS_BADOP ;Invalid operation!
          jsr     SysErr
 ; 
          lda     #XNODRIVE
@@ -145,7 +158,7 @@ DoTable: .word   DRead-1    ;0 Read request
 ; D_INIT call processing
 ; 
 DInit:   bit     InitStatus
-         bmi     @L2121
+         bmi     DInitDone
          dec     InitStatus
          lda     DIB0_Slot
          clc
@@ -155,7 +168,7 @@ DInit:   bit     InitStatus
          ldx     SIR_Addr
          ldy     SIR_Addr+1
          jsr     AllocSIR
-         bcs     @L2126
+         bcs     InitNoResource
          lda     DIB0_Slot
          asl     A
          asl     A
@@ -168,19 +181,22 @@ DInit:   bit     InitStatus
          jsr     DCtrl00
          lda     #$01
          jsr     L22DB
-         bcs     @L2122
+         bcs     InitNoDrive
 @L2116:  lda     $ca28
          cmp     #$d5
-         beq     @L2121
+         beq     DInitDone
          cmp     #$ad
-         bne     @L2122
-@L2121:  rts
+         bne     InitNoDrive
+DInitDone:
+         rts
 
-@L2122:  lda     #XNODRIVE  ;Drive not connected
-         bne     @L2128
+InitNoDrive:
+         lda     #XNODRIVE  ;Drive not connected
+         bne     L2128
 
-@L2126:  lda     #$25       ;Resource not available
-@L2128:  sta     Var06
+InitNoResource:
+         lda     #SOS_NORESC ;Resource not available
+L2128:   sta     LastError
          jsr     SysErr
 ; 
 ; D_READ call processing
@@ -230,7 +246,7 @@ L2150:   jsr     L2241
          rts
 
 IO_Error:
-         lda     #$27       ;I/O error
+         lda     #SOS_IOERR ;I/O error
          jsr     SysErr
 ; 
 ; D_WRITE call processing
@@ -268,24 +284,25 @@ DWrite:  jsr     L21DF
          rts
 
 L21DF:   lda     SOS_Unit
-         sta     VarTbl1
-         lda     L2022
+         sta     LastUnit
+         lda     DCB_Bytes
          sta     Var08
          lda     ReqCnt
-         bne     @L21F5
-         lda     $c5
-         bne     @L21F5
-@L21F2:  jmp     SysErr
+         bne     L21F5      ;Positive request count, continue
+         lda     ReqCnt+1
+         bne     L21F5      ;Positive request count, continue
+WriteError:
+         jmp     SysErr
 
-@L21F5:  lda     SosBlk
+L21F5:   lda     SosBlk
          cmp     DIB0_Blks
          lda     SosBlk+1
          sbc     DIB0_Blks+1
-         lda     #XBLKNUM   ;Block number too large
-         bcs     @L21F2
+         lda     #SOS_BLKNUM ;Block number too large
+         bcs     WriteError
          jsr     L227C
-         lda     #XBYTECNT  ;Byte count not a multiple of 512
-         bcc     @L21F2
+         lda     #SOS_BYTECNT ;Byte count not a multiple of 512
+         bcc     WriteError
          rts
 
 L220B:   ldx     #$06
@@ -318,10 +335,11 @@ L2224:   lda     $cb
 @L2240:  rts
 
 L2241:   ldx     #$06
-@L2243:  lda     $ca29,x
-         sta     VarTbl2,x
+CpyCSList:
+         lda     $ca29,x    ;Copy 7 Control/Status list bytes from device
+         sta     StatusList,x
          dex
-         bpl     @L2243
+         bpl     CpyCSList
          sec
          lda     $ca29
          bpl     @L226D
@@ -351,7 +369,7 @@ L2241:   ldx     #$06
          jsr     $402b
 L227C:   lda     ReqCnt
          bne     @L22D6
-         lda     $c5
+         lda     ReqCnt+1
          lsr     A
          bcs     @L22D6
          sta     Var09
@@ -399,13 +417,13 @@ L227C:   lda     ReqCnt
 @L22D6:  clc
          rts
 
-L22D8:   lda     L2023
+L22D8:   lda     DCB_Bytes+1
 L22DB:   sta     Var0B
 @L22DE:  jsr     @L22E9
-         bcc     @L22E8
+         bcc     @Done
          dec     Var0B
          bne     @L22DE
-@L22E8:  rts
+@Done:   rts
 
 @L22E9:  lda     #$a0
          sta     Var0A
@@ -422,7 +440,7 @@ L22DB:   sta     Var0B
 
 @L2302:  clc
          lda     DIB0_Slot
-         jsr     $1922
+         jsr     SelC800
          rts
 
 L230A:   sta     $ca28
@@ -469,17 +487,17 @@ L2325:   tay
          sta     $ca26
          lda     #$00
          sta     $ca27
-         ldx     DIB1-1
+         ldx     DCB_Bytes+2
          stx     $ca21
 @L236B:  cpy     #$03
-         bne     @L237C
+         bne     @Done
          ldy     #$00
          lda     (CSList),y
          sta     $ca26
          iny
          lda     (CSList),y
          sta     $ca27
-@L237C:  rts
+@Done:   rts
 
 ; 
 ; D_STATUS call processing
@@ -528,7 +546,7 @@ DStat00: jsr     L22D8
 ; status code $01
 ; 
 DStat01: ldy     #$06
-@L23C9:  lda     VarTbl2,y
+@L23C9:  lda     StatusList,y
          sta     (CSList),y
          dey
          bpl     @L23C9
@@ -547,19 +565,20 @@ DStatFE: ldy     #$00
 ; 
 ; D_REPEAT - repeat the last D_READ or D_WRITE call
 ; 
-DRepeat: lda     VarTbl1
+DRepeat: lda     LastUnit
          cmp     SOS_Unit
-         bne     @L23F4
-         lda     VarTbl1+1
+         bne     DRepeatErr
+         lda     LastReq
          sta     ReqCode
-         bne     @L23ED
+         bne     @Write
          jmp     DRead
 
-@L23ED:  cmp     #$02
-         bcs     @L23F4
+@Write:  cmp     #$02
+         bcs     DRepeatErr
          jmp     DWrite
 
-@L23F4:  jmp     BadOp
+DRepeatErr:
+         jmp     BadOp
 
 ; 
 ; D_CONTROL call processing
@@ -596,13 +615,13 @@ CtrlFE:  jsr     L22D8
 @L2422:  jmp     IO_Error
 
 @L2425:  ldy     #$00
-@L2427:  lda     @L246D,y
+@L2427:  lda     Z8Block1,y
          sta     $cb00,y
-         lda     @L256D,y
+         lda     Z8Block2,y
          sta     $cc00,y
-         lda     @L266D,y
+         lda     Z8Block3,y
          sta     $cd00,y
-         lda     L276D,y
+         lda     L276D,y    ;This would be pulling data from beyond the Z8 block???
          sta     $ce00,y
          iny
          bne     @L2427
@@ -628,7 +647,8 @@ CtrlFE:  jsr     L22D8
          jmp     L2150
 
 ; maybe Z8 code to do the formatting of the disk
-@L246D:  .byte   $8b,$04,$97,$01,$02,$00,$8f,$e6
+Z8Block1:
+         .byte   $8b,$04,$97,$01,$02,$00,$8f,$e6
          .byte   $39,$80,$e6,$04,$10,$e6,$05,$4b
          .byte   $d6,$00,$18,$31,$10,$b0,$12,$56
          .byte   $33,$01,$e6,$31,$3f,$e6,$04,$10
@@ -660,7 +680,8 @@ CtrlFE:  jsr     L22D8
          .byte   $92,$ca,$cf,$af,$af,$e4,$00,$1e
          .byte   $e6,$1b,$17,$31,$20,$e6,$04,$10
          .byte   $e6,$05,$3c,$d6,$00,$18,$a4,$1e
-@L256D:  .byte   $45,$6b,$05,$e4,$45,$1e,$00,$1b
+Z8Block2:
+         .byte   $45,$6b,$05,$e4,$45,$1e,$00,$1b
          .byte   $af,$af,$e4,$1a,$0d,$d6,$15,$02
          .byte   $d6,$15,$17,$31,$20,$e4,$1b,$07
          .byte   $56,$e4,$7f,$92,$48,$31,$00,$b0
@@ -692,7 +713,8 @@ CtrlFE:  jsr     L22D8
          .byte   $31,$20,$46,$e4,$80,$92,$48,$31
          .byte   $00,$af,$44,$33,$33,$44,$33,$33
          .byte   $f0,$05,$d6,$15,$01,$2c,$ff,$4a
-@L266D:  .byte   $f1,$af,$e6,$04,$10,$e6,$05,$2a
+Z8Block3:
+         .byte   $f1,$af,$e6,$04,$10,$e6,$05,$2a
          .byte   $d6,$00,$18,$e6,$04,$10,$e6,$05
          .byte   $5a,$d6,$00,$18,$31,$10,$af,$31
          .byte   $00,$78,$1b,$d6,$15,$4f,$ec,$15
@@ -746,10 +768,10 @@ DCtrl04: jsr     L22D8
          txa
          clc
          adc     $d8
-         sta     VarTbl1+2
+         sta     Var12
          pla
          adc     $d9
-         sta     VarTbl1+3
+         sta     Var13
          jsr     L278D
          stx     $da
          stx     $ca27
@@ -774,9 +796,9 @@ L2758:   lda     ($d8),y
          bne     @L2768
          inc     $db
 @L2768:  lda     $d8
-         cmp     VarTbl1+2
+         cmp     Var12
 L276D:   lda     $d9
-         sbc     VarTbl1+3
+         sbc     Var13
          bcc     L2758
          rts
 
